@@ -13,22 +13,20 @@ import java.util.UUID;
 @Service
 public class AzureBlobStorageService {
 
+
     private final BlobContainerClient containerClient;
 
-    public AzureBlobStorageService(
-            @Value("${azure.storage.connection-string}") String connectionString,
-            @Value("${azure.storage.container-name}") String containerName) {
+    public AzureBlobStorageService(AzureStorageProperties props) {
 
         this.containerClient = new BlobContainerClientBuilder()
-                .connectionString(connectionString)
-                .containerName(containerName)
+                .connectionString(props.getConnectionString())
+                .containerName(props.getContainerName())
                 .buildClient();
 
         if (!containerClient.exists()) {
             containerClient.create();
         }
     }
-
     public String uploadFile(MultipartFile file) {
         try {
             String filename = UUID.randomUUID() + "-" + file.getOriginalFilename();
