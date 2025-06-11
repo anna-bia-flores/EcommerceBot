@@ -12,7 +12,7 @@ import java.util.List;
 public class CreateOrderDto {
 
     private String userId;
-    private String userEmail;
+    private String addressId;
 
     private String cvv;
     private String creditCardId;
@@ -22,7 +22,6 @@ public class CreateOrderDto {
         Order order = new Order();
         order.setUserId(userId);
         order.setCreditCardId(creditCardId);
-        order.setUserEmail(userEmail);
 
         order.setItems(items.stream().map(OrderItemDto::toEntity).toList());
         return order;

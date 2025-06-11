@@ -29,6 +29,8 @@ public class Order {
     private String userId;
     private String userEmail;
 
+    private DeliveryAddress deliveryAddress ;
+
     private String creditCardId;
 
     private List<OrderItem> items;

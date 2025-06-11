@@ -8,7 +8,11 @@ import br.edu.ibmec.cloud.Ecommerce.useCases.product.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.multipart.MultipartFile;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.Parameter;
+import org.springframework.http.MediaType;
 import java.util.List;
 
 @RestController
@@ -22,6 +26,7 @@ public class ProductController {
     private final SearchProductByNameUseCase searchProductByNameUseCase;
     private final UpdateProductUseCase updateProductUseCase;
     private final DeleteProductUseCase deleteProductUseCase;
+    private final AddProductImageUseCase addProductImageUseCase;
 
     @PostMapping
     public ResponseEntity<Product> create(@RequestBody CreateProductDto dto) {
@@ -62,4 +67,23 @@ public class ProductController {
         deleteProductUseCase.execute(id);
         return ResponseEntity.noContent().build();
     }
+
+
+    @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Upload image for a product")
+    public ResponseEntity<Product> uploadImage(
+            @PathVariable String id,
+            @Parameter(description = "Image file", required = true)
+            @RequestPart("file") MultipartFile file
+    ) {
+        try {
+            Product updatedProduct = addProductImageUseCase.execute(id, file);
+            return ResponseEntity.ok(updatedProduct);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
 }

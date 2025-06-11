@@ -1,11 +1,10 @@
 package br.edu.ibmec.cloud.Ecommerce.useCases.order;
 
 import br.edu.ibmec.cloud.Ecommerce.dtos.order.CreateOrderDto;
-import br.edu.ibmec.cloud.Ecommerce.models.CreditCard;
-import br.edu.ibmec.cloud.Ecommerce.models.Order;
-import br.edu.ibmec.cloud.Ecommerce.models.OrderItem;
-import br.edu.ibmec.cloud.Ecommerce.models.Product;
+import br.edu.ibmec.cloud.Ecommerce.models.*;
 import br.edu.ibmec.cloud.Ecommerce.repositories.CreditCardRepository;
+import br.edu.ibmec.cloud.Ecommerce.repositories.UserAddressRepository;
+import br.edu.ibmec.cloud.Ecommerce.repositories.UserRepository;
 import br.edu.ibmec.cloud.Ecommerce.repositories.cosmos.OrderCosmosRepository;
 import br.edu.ibmec.cloud.Ecommerce.repositories.cosmos.ProductCosmosRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +17,13 @@ import java.math.BigDecimal;
 public class PlaceOrderUseCase {
 
     private final OrderCosmosRepository repository;
-    private final CreditCardRepository creditCardRepository;
     private final ProductCosmosRepository productCosmosRepository;
+
+    private final CreditCardRepository creditCardRepository;
+    private final UserRepository userRepository;
+
+    private final UserAddressRepository userAddressRepository;
+
 
     public Order execute(CreateOrderDto dto) {
         System.out.println("📥 Pedido recebido para usuário: " + dto.getUserId());
@@ -45,15 +49,28 @@ public class PlaceOrderUseCase {
             System.out.println("✅ Item validado: " + item.getName() + " x" + item.getQuantity());
         }
 
+
+
+        User user = userRepository.findById(dto.getUserId()).get();
+
+        order.setUserEmail(user.getEmail());
+
+        UserAddress address = userAddressRepository.findById(dto.getAddressId()).get();
+
+        DeliveryAddress deliveryAddress = address.toDeliveryAddress();
+
+
+        order.setDeliveryAddress(deliveryAddress);
+
         // Cartão
         CreditCard card = creditCardRepository.findById(dto.getCreditCardId())
                 .orElseThrow(() -> new IllegalArgumentException("❌ Cartão não encontrado: " + dto.getCreditCardId()));
 
-
         // Processamento e validação
         order.placeOrder(card, dto.getCvv());
-
         System.out.println("💳 Total: " + order.getTotalAmount() + " | Novo saldo: " + card.getBalance());
+
+
 
         try {
             Order saved = repository.save(order);

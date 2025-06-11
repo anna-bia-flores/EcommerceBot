@@ -12,18 +12,24 @@ public class UserAddress {
     private String id;
 
     private String street;
-
     private String number;
-
     private String city;
-
     private String state;
-
     private String postalCode;
-
     private String country;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    public DeliveryAddress toDeliveryAddress() {
+        DeliveryAddress delivery = new DeliveryAddress();
+        delivery.setStreet(this.street);
+        delivery.setNumber(this.number);
+        delivery.setCity(this.city);
+        delivery.setState(this.state);
+        delivery.setPostalCode(this.postalCode);
+        delivery.setCountry(this.country);
+        return delivery;
+    }
 }

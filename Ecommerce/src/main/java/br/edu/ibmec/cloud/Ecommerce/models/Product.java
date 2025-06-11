@@ -8,7 +8,8 @@ import org.springframework.data.annotation.Id;
 
 import java.math.BigDecimal;
 import java.util.Optional;
-
+import java.util.ArrayList;
+import java.util.List;
 @Data
 @NoArgsConstructor
 @Container(containerName = "products")
@@ -16,6 +17,10 @@ public class Product {
 
     @Id
     private String id;
+
+
+
+    private List<String> imageUrls = new ArrayList<>();
 
     @PartitionKey
     private String category;
