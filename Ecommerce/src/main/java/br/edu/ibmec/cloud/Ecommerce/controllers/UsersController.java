@@ -1,12 +1,7 @@
 package br.edu.ibmec.cloud.Ecommerce.controllers;
 
-import br.edu.ibmec.cloud.Ecommerce.dtos.users.CreateUserDto;
-import br.edu.ibmec.cloud.Ecommerce.dtos.users.UpdateUserDto;
-import br.edu.ibmec.cloud.Ecommerce.dtos.users.UserDto;
-import br.edu.ibmec.cloud.Ecommerce.useCases.users.CreateUserUseCase;
-import br.edu.ibmec.cloud.Ecommerce.useCases.users.GetUserByIdUseCase;
-import br.edu.ibmec.cloud.Ecommerce.useCases.users.ListUsersUseCase;
-import br.edu.ibmec.cloud.Ecommerce.useCases.users.UpdateUserUseCase;
+import br.edu.ibmec.cloud.Ecommerce.dtos.users.*;
+import br.edu.ibmec.cloud.Ecommerce.useCases.users.*;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,22 +11,30 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 public class UsersController {
-
     private final CreateUserUseCase createUserUseCase;
     private final GetUserByIdUseCase getUserByIdUseCase;
     private final UpdateUserUseCase updateUserUseCase;
     private final ListUsersUseCase listUsersUseCase;
 
+    private final LoginUserUseCase loginUserUseCase;
     public UsersController(
-        CreateUserUseCase createUserUseCase,
-        GetUserByIdUseCase getUserByIdUseCase,
-        UpdateUserUseCase updateUserUseCase,
-        ListUsersUseCase listUsersUseCase
+            CreateUserUseCase createUserUseCase,
+            GetUserByIdUseCase getUserByIdUseCase,
+            UpdateUserUseCase updateUserUseCase,
+            ListUsersUseCase listUsersUseCase,
+            LoginUserUseCase loginUserUseCase
     ) {
+        this.loginUserUseCase = loginUserUseCase;
         this.createUserUseCase = createUserUseCase;
         this.getUserByIdUseCase = getUserByIdUseCase;
         this.updateUserUseCase = updateUserUseCase;
         this.listUsersUseCase = listUsersUseCase;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<UserDto> login(@Valid @RequestBody LoginDto dto) {
+        UserDto user = loginUserUseCase.execute(dto);
+        return ResponseEntity.ok(user);
     }
 
     @PostMapping
@@ -56,8 +59,8 @@ public class UsersController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserDto>> listAll() {
-        List<UserDto> users = listUsersUseCase.execute();
+    public ResponseEntity<List<UserSummaryDto>> listAll() {
+        List<UserSummaryDto> users = listUsersUseCase.execute();
         return ResponseEntity.ok(users);
     }
 }

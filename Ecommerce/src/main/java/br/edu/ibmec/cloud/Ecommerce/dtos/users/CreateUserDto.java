@@ -33,7 +33,6 @@ public class CreateUserDto {
         user.setName(this.name);
         user.setEmail(this.email);
         user.setPassword(this.password);
-        user.setBalance(java.math.BigDecimal.ZERO);
 
         if (this.addresses != null && !this.addresses.isEmpty()) {
             user.setAddresses(this.addresses.stream()

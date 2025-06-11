@@ -20,7 +20,7 @@ public class CreateCreditCardDto {
     private String cvv;
 
 
-    @Pattern(regexp = "^(0[1-9]|1[0-2])/\\d{4}$", message = "Invalid expiration date format. Use MM/yyyy")
+    @Pattern(regexp = "^(0[1-9]|1[0-2])/\\d{2}$", message = "Invalid expiration date format. Use MM/yy")
     private String expirationDate;
 
     private BigDecimal balance = BigDecimal.ZERO;

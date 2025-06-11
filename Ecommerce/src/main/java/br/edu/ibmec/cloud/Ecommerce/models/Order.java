@@ -1,16 +1,19 @@
 package br.edu.ibmec.cloud.Ecommerce.models;
 
-import jakarta.persistence.*;
+import com.azure.spring.data.cosmos.core.mapping.Container;
+import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-@Entity
-@Table(name = "orders")
+import java.util.Optional;
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
+@Container(containerName = "orders")
 public class Order {
 
     public enum Status {
@@ -18,44 +21,61 @@ public class Order {
     }
 
     @Id
-    private String id;
+    private String id = UUID.randomUUID().toString();
 
     private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Enumerated(EnumType.STRING)
     private Status status = Status.PENDING;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private String userId;
+    private String userEmail;
 
-    @ManyToOne
-    @JoinColumn(name = "credit_card_id", nullable = false)
-    private CreditCard creditCard;
+    private String creditCardId;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items;
 
+
     public BigDecimal getTotalAmount() {
+        if (items == null || items.isEmpty()) {
+            System.out.println("⚠️ Pedido sem itens!");
+            return BigDecimal.ZERO;
+        }
         return items.stream()
-                .map(OrderItem::getSubtotal)
+                .map(OrderItem::getSubtotalDecimal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public void placeOrder() {
-        BigDecimal total = getTotalAmount();
+    public void placeOrder(CreditCard card, String cvv) {
+        if (items == null || items.isEmpty()) {
+            throw new IllegalStateException("Order must have at least one item");
+        }
 
-        if (!creditCard.isValid()) {
+        BigDecimal total = getTotalAmount();
+        System.out.println("🔍 Total do pedido: " + total);
+
+        if (!card.isValid()) {
             this.status = Status.REJECTED;
+            System.out.println("❌ Cartão expirado: " + card.getExpirationDate());
             throw new IllegalStateException("Credit card is expired or invalid");
         }
 
-        if (!creditCard.hasSufficientBalance(total)) {
+        if (!card.isValid(cvv)) {
             this.status = Status.REJECTED;
+            System.out.println("❌ CVV inválido");
+            throw new IllegalArgumentException("Invalid CVV for credit card");
+        }
+
+        if (!card.hasSufficientBalance(total)) {
+            this.status = Status.REJECTED;
+            System.out.println("❌ Saldo insuficiente: " + card.getBalance());
             throw new IllegalStateException("Insufficient balance on credit card");
         }
 
-        creditCard.debit(total);
+        card.debit(total);
+
+        // Preenche os dados do cartão para armazenar no pedido
+        setCreditCardId(card.getId());
+
         this.status = Status.CONFIRMED;
+        System.out.println("✅ Pedido confirmado. Novo saldo: " + card.getBalance());
     }
 }

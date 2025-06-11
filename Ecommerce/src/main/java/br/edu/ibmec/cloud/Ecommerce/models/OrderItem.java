@@ -1,31 +1,44 @@
 package br.edu.ibmec.cloud.Ecommerce.models;
 
-import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
-@Entity
-@Table(name = "order_items")
 @Data
+@NoArgsConstructor
 public class OrderItem {
 
-    @Id
-    private String id;
-
-    private String productName;
-
+    private String productId;
+    private String name;
     private int quantity;
+    private String subtotal = "0.00";
+    private String unitPrice = "0.00";
 
-    private BigDecimal unitPrice;
+    // ✅ Interface pública para definir preço (e atualizar subtotal automaticamente)
+    public void setUnitPriceDecimal(BigDecimal value) {
+        this.unitPrice = value != null ? value.toPlainString() : "0.00";
+        calculateSubtotal();
+    }
 
-    @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    // ✅ Interface pública para expor subtotal como BigDecimal para leitura
+    public BigDecimal getSubtotalDecimal() {
+        return new BigDecimal(Optional.ofNullable(subtotal).orElse("0.00"));
+    }
 
-    /** Business Logic **/
+    // ✅ Interface pública para expor unitPrice como BigDecimal para leitura (usado em DTOs)
+    public BigDecimal getUnitPriceDecimal() {
+        return new BigDecimal(Optional.ofNullable(unitPrice).orElse("0.00"));
+    }
 
-    public BigDecimal getSubtotal() {
-        return unitPrice.multiply(BigDecimal.valueOf(quantity));
+    // 🔒 Métodos privados (lógica interna)
+    private void setSubtotalDecimal(BigDecimal value) {
+        this.subtotal = value != null ? value.toPlainString() : "0.00";
+    }
+
+    private void calculateSubtotal() {
+        BigDecimal subtotalCalc = getUnitPriceDecimal().multiply(BigDecimal.valueOf(quantity));
+        setSubtotalDecimal(subtotalCalc);
     }
 }

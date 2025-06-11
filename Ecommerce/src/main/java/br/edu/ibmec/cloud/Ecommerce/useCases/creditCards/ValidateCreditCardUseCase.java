@@ -17,9 +17,9 @@ public class ValidateCreditCardUseCase {
 
     public ValidateCreditCardDto execute(ValidateCreditCardRequestDto dto) {
         CreditCard card = repository.findById(dto.getCardId())
-            .orElseThrow(() -> new IllegalArgumentException("Credit card not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Credit card not found"));
 
-        boolean isValid = card.isValid() && card.getCvv().equals(dto.getCvv());
+        boolean isValid = card.isValid(dto.getCvv());
         return new ValidateCreditCardDto(dto.getCardId(), isValid);
     }
 }

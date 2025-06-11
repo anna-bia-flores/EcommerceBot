@@ -1,6 +1,6 @@
 package br.edu.ibmec.cloud.Ecommerce.useCases.users;
 
-import br.edu.ibmec.cloud.Ecommerce.dtos.users.UserDto;
+import br.edu.ibmec.cloud.Ecommerce.dtos.users.UserSummaryDto;
 import br.edu.ibmec.cloud.Ecommerce.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +16,9 @@ public class ListUsersUseCase {
         this.repository = repository;
     }
 
-    public List<UserDto> execute() {
+    public List<UserSummaryDto> execute() {
         return repository.findAll().stream()
-            .map(UserDto::fromEntity)
-            .collect(Collectors.toList());
+                .map(UserSummaryDto::fromEntity)
+                .collect(Collectors.toList());
     }
 }

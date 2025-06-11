@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Data
 public class UserAddressDto {
-
     private String id;
     private String street;
     private String number;
