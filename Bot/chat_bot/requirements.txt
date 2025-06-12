@@ -1,6 +1,7 @@
-botbuilder-core
-asyncio
 aiohttp
-cookiecutter==1.7.0
+cryptography==45.0.3
+PyJWT==2.10.1
+botbuilder-core==4.16.2
+botbuilder-dialogs==4.16.2
+botbuilder-schema==4.16.2
 
-botbuilder-integration-aiohttp>=4.14.0
